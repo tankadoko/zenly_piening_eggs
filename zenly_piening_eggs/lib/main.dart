@@ -81,6 +81,18 @@ class _MyHomePageState extends State<MyHomePage> {
               Text("ACCEL_Y: $accel_y"),
             ],
           ),
+          Center(
+            child: Container(
+                height: 100,
+                width: 200,
+                decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('src/images/pien_without_background.png'
+                  ),
+                fit: BoxFit.cover,
+              )),
+            ),
+          ),
         ],
       ),
     );
