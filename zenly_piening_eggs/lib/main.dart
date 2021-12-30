@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
+import 'package:sensors/sensors.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -48,68 +49,60 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  late List<double> _accelerometerValues;
+  late List<StreamSubscription<dynamic>> _streamSubscriptions = <StreamSubscription<dynamic>>[];
+
+    @override
+  Widget build(BuildContext context) {
+    final List<String> accelerometer = _accelerometerValues.map((double v) => v.toStringAsFixed(1)).toList();
+    final double accel_x = _accelerometerValues[0];
+    final String accel_y = _accelerometerValues[1].toStringAsFixed(2);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Material(
+            color: Colors.yellow[100],
+            child: Container(
+              padding: EdgeInsets.all(4.0),
+              child: FlutterLogo(
+                size: 72.0,
+              ),
+            ),
+          ),
+          Column(
+            children: <Widget>[
+              Text('Accelerometer: $accelerometer',),
+              Text('ACCEL_X: $accel_x'),
+              Text("ACCEL_Y: $accel_y"),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+  void dispose() {
+    super.dispose();
+    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
   }
+
+  @override
+  void initState() {
+    super.initState();
+    _streamSubscriptions
+      .add(accelerometerEvents.listen((AccelerometerEvent event) {
+        setState(() {
+          _accelerometerValues = <double>[event.x, event.y, event.z];
+        });
+    }));
+  }
+
 }
